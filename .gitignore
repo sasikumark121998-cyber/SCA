@@ -11,3 +11,7 @@ dist/
 # Data
 backend/data/
 backend/uploads/
+
+
+# VS Code
+.vscode/

@@ -1,13 +1,8 @@
-"""Configuration and environment variables."""
-from pydantic import BaseSettings
+from dotenv import load_dotenv
+import os
 
+load_dotenv()
 
-class Settings(BaseSettings):
-    DATABASE_URL: str = "postgresql://user:pass@localhost:5432/dbname"
-    SECRET_KEY: str = "replace-me"
+DATABASE_URL = os.getenv("DATABASE_URL")
 
-    class Config:
-        env_file = ".env"
-
-
-settings = Settings()
+print(DATABASE_URL)  # Temporary, just to test
