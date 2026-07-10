@@ -1,0 +1,7 @@
+Based on 10/10 valid queries (0 skipped due to API failures)
+Metric,Standard RAG,HyDE RAG,Improvement
+NDCG@10,0.2387,0.5436,0.3049
+Hit Rate,0.4,0.7,0.3
+Exact Match,1.0,1.0,0.0
+ROUGE-L,0.0549,0.0644,0.0095
+Faithfulness,0.1095,0.1499,0.0404
