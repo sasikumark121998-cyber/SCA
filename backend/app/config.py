@@ -1,8 +1,10 @@
-from dotenv import load_dotenv
 import os
+from dotenv import load_dotenv
 
 load_dotenv()
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 
-print(DATABASE_URL)  # Temporary, just to test
+SECRET_KEY = os.getenv("SECRET_KEY")
+
+HF_API_KEY = os.getenv("HF_API_KEY")
