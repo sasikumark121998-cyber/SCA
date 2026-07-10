@@ -8,10 +8,9 @@ env/
 node_modules/
 dist/
 
-# Data
-backend/data/
-backend/uploads/
-
+# Environment variables
+.env
+backend/.env
 
 # VS Code
 .vscode/
