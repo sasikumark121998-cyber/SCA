@@ -18,7 +18,7 @@ const TITLES = {
 }
 
 export default function App() {
-  const [isAuthed, setIsAuthed] = useState(false)
+  const [isAuthed, setIsAuthed] = useState(!!localStorage.getItem('token'))
   const [view, setView] = useState('create')
   const [patient, setPatient] = useState(null)
 
@@ -30,7 +30,18 @@ export default function App() {
     setView('results')
   }
 
+  const handleViewHistory = (record) => {
+    setPatient({
+      name: record.name,
+      symptoms: record.symptoms,
+      patientId: record.id,
+      aiResult: { diagnosis: record.diagnosis },
+    })
+    setView('results')
+  }
+
   const handleLogout = () => {
+    localStorage.removeItem('token')
     setIsAuthed(false)
     setView('create')
     setPatient(null)
@@ -49,8 +60,8 @@ export default function App() {
 
         {view === 'create' && <CreatePatient onSave={handleSave} />}
         {view === 'results' && <Results patient={patient} />}
-        {view === 'history' && <History />}
-        {view === 'prescription' && <Prescription />}
+        {view === 'history' && <History onView={handleViewHistory} />}
+        {view === 'prescription' && <Prescription patient={patient} />}
         {!['create', 'results', 'history', 'prescription'].includes(view) && (
           <Placeholder label={TITLES[view]} />
         )}

@@ -9,11 +9,11 @@ class RegisterRequest(BaseModel):
 class LoginRequest(BaseModel):
     email : str
     password :str
-
+    
 class DiagnosisRequest(BaseModel):
     symptoms : str
     medical_history: str
-
+    patient_name: str | None = None
 class FeedbackRequest(BaseModel):
     query_id: int
     rating: int

@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Eye, Trash2, Calendar, ChevronLeft, ChevronRight } from 'lucide-react'
+import { getHistory, deleteHistory, getHistoryById } from '../api/client'
 
 const STATUS_STYLES = {
   Completed: 'text-good',
@@ -7,34 +8,61 @@ const STATUS_STYLES = {
   Pending: 'text-orange-500',
 }
 
-const SAMPLE_PATIENTS = [
-  { id: '#4355', name: 'Michael A. Miner', gender: 'Male', symptoms: 'Fever', doctor: 'Michael Miner', date: '19 Jun 25', status: 'Completed' },
-  { id: '#4355', name: 'Michael A. Miner', gender: 'Female', symptoms: 'Headache', doctor: 'Miner', date: '19 Jun 25', status: 'In progress' },
-  { id: '#4355', name: 'Michael A. Miner', gender: 'Male', symptoms: 'Cough', doctor: 'Michael Miner', date: '19 Jun 25', status: 'Pending' },
-  { id: '#4355', name: 'Michael A. Miner', gender: 'Female', symptoms: 'Fever', doctor: 'Miner', date: '19 Jun 25', status: 'Completed' },
-  { id: '#4355', name: 'Michael A. Miner', gender: 'Male', symptoms: 'Cough', doctor: 'Miner', date: '19 Jun 25', status: 'In progress' },
-  { id: '#4355', name: 'Michael A. Miner', gender: 'Female', symptoms: 'Headache', doctor: 'Miner', date: '19 Jun 25', status: 'Completed' },
-  { id: '#4355', name: 'Michael A. Miner', gender: 'Male', symptoms: 'Fever', doctor: 'Michael Miner', date: '19 Jun 25', status: 'In progress' },
-  { id: '#4355', name: 'Michael A. Miner', gender: 'Female', symptoms: 'Cough', doctor: 'Miner', date: '19 Jun 25', status: 'Pending' },
-  { id: '#4355', name: 'Michael A. Miner', gender: 'Male', symptoms: 'Headache', doctor: 'Miner', date: '19 Jun 25', status: 'Completed' },
-  { id: '#4355', name: 'Michael A. Miner', gender: 'Female', symptoms: 'Fever', doctor: 'Miner', date: '19 Jun 25', status: 'In progress' },
-  { id: '#4355', name: 'Michael A. Miner', gender: 'Male', symptoms: 'Cough', doctor: 'Miner', date: '19 Jun 25', status: 'In progress' },
-]
-
 const COLUMNS = ['ID', 'Name', 'Gender', 'Symptoms', 'Doctor', 'Date', 'Status', 'Action']
 
-export default function History() {
-  const [patients, setPatients] = useState(SAMPLE_PATIENTS.map((p, i) => ({ ...p, key: i })))
-  const [page, setPage] = useState(3)
-  const totalPages = 45
+export default function History({ onView }) {
+  const [patients, setPatients] = useState([])
+  const [page, setPage] = useState(1)
+  const totalPages = 1
 
-  const handleDelete = (key) => {
-    setPatients((rows) => rows.filter((r) => r.key !== key))
+  useEffect(() => {
+    loadHistory()
+  }, [])
+
+  const loadHistory = async () => {
+    try {
+      const data = await getHistory()
+      setPatients(
+        data.map((row, i) => ({
+          key: i,
+          id: '#' + row.id,
+          name: row.patient_name || '--',
+          gender: row.gender || '--',
+          symptoms: row.symptoms || '--',
+          doctor: row.doctor || '--',
+          date: row.created_at
+            ? new Date(row.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: '2-digit' })
+            : '--',
+          status: 'Completed',
+          backendId: row.id,
+        }))
+      )
+    } catch (err) {
+      console.error(err.message)
+    }
   }
 
-  const handleView = (row) => {
-    // hook this up to navigate to the Results view for this patient
-    console.log('view patient', row)
+  const handleDelete = async (key, backendId) => {
+    try {
+      await deleteHistory(backendId)
+      setPatients((rows) => rows.filter((r) => r.key !== key))
+    } catch (err) {
+      console.error(err.message)
+    }
+  }
+
+  const handleView = async (row) => {
+    try {
+      const full = await getHistoryById(row.backendId)
+      onView?.({
+        id: row.id,
+        name: row.name,
+        symptoms: full.symptoms,
+        diagnosis: full.diagnosis,
+      })
+    } catch (err) {
+      console.error(err.message)
+    }
   }
 
   return (
@@ -78,7 +106,7 @@ export default function History() {
                   <Eye className="w-[15px] h-[15px] text-indigo-light" />
                 </button>
                 <button
-                  onClick={() => handleDelete(row.key)}
+                  onClick={() => handleDelete(row.key, row.backendId)}
                   className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center hover:bg-rose-100 transition-colors"
                   title="Delete"
                 >

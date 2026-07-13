@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Eye, EyeOff, Check } from 'lucide-react'
 import medicalBg from '../assets/c.jpg'
+import { loginUser, registerUser } from '../api/client'
 
 export default function Auth({ onAuthenticated }) {
   const [mode, setMode] = useState('signin') // 'signup' | 'signin'
@@ -12,10 +13,46 @@ export default function Auth({ onAuthenticated }) {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
   const [saveDetails, setSaveDetails] = useState(true)
+  const [error, setError] = useState('')
 
-  const handleSubmit = (e) => {
+  const handleMobileOrEmailChange = (e) => {
+    const val = e.target.value
+    // if it's purely numeric, cap at 10 digits (mobile number)
+    if (/^\d*$/.test(val)) {
+      if (val.length <= 10) setMobileOrEmail(val)
+    } else {
+      setMobileOrEmail(val)
+    }
+  }
+
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    onAuthenticated?.({ mode, mobileOrEmail })
+    setError('')
+
+    const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(mobileOrEmail)
+    const isMobile = /^\d{10}$/.test(mobileOrEmail)
+
+    if (!isEmail && !isMobile) {
+      setError('Enter a valid 10-digit mobile number or email address')
+      return
+    }
+
+    try {
+      if (isSignUp) {
+        if (password !== confirmPassword) {
+          setError('Passwords do not match')
+          return
+        }
+        await registerUser({ username: mobileOrEmail, email: mobileOrEmail, password })
+        setMode('signin')
+        return
+      }
+      const data = await loginUser({ email: mobileOrEmail, password })
+      localStorage.setItem('token', data.access_token)
+      onAuthenticated?.({ mode, mobileOrEmail })
+    } catch (err) {
+      setError(err.message)
+    }
   }
 
   return (
@@ -40,7 +77,7 @@ export default function Auth({ onAuthenticated }) {
               <input
                 type="text"
                 value={mobileOrEmail}
-                onChange={(e) => setMobileOrEmail(e.target.value)}
+                onChange={handleMobileOrEmailChange}
                 placeholder={isSignUp ? 'Mobile No / Mail ID' : 'Mobile NO / Mail ID'}
                 className="w-full px-4 py-3 rounded-lg bg-white/90 border border-slate-200 text-[13px] text-ink placeholder:text-faint outline-none focus:border-indigo-light transition-colors"
               />
@@ -87,6 +124,10 @@ export default function Auth({ onAuthenticated }) {
                   </span>
                   <span className="text-[12px] text-ink">Save Details</span>
                 </label>
+              )}
+
+              {error && (
+                <p className="text-[12px] text-red-600 text-center">{error}</p>
               )}
 
               <button

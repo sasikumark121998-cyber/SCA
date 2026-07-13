@@ -66,9 +66,13 @@ def get_current_user(
 
 @router.post("/register")
 def register(user: RegisterRequest, db: Session = Depends(get_db)):
-    existing_user = db.query(User).filter(User.email == user.email).first()
-    if existing_user:
+    existing_email = db.query(User).filter(User.email == user.email).first()
+    if existing_email:
         raise HTTPException(status_code=400, detail="Email already exists")
+
+    existing_username = db.query(User).filter(User.username == user.username).first()
+    if existing_username:
+        raise HTTPException(status_code=400, detail="Username already exists")
 
     new_user = User(
         username=user.username,
@@ -80,7 +84,6 @@ def register(user: RegisterRequest, db: Session = Depends(get_db)):
     db.refresh(new_user)
 
     return {"message": "User Registered Successfully"}
-
 
 @router.post("/login")
 def login(

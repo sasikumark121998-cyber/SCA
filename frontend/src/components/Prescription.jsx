@@ -1,7 +1,7 @@
-import { useState } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { Calendar } from 'lucide-react'
 
-const PATIENT = {
+const DEFAULT_PATIENT = {
   name: 'Hudson Dylan',
   gender: 'Male',
   age: '49',
@@ -21,7 +21,7 @@ const HISTORY_ROWS = Array.from({ length: 13 }, (_, i) => ({
   key: i,
 }))
 
-const DEFAULT_RX_ROWS = [
+const FALLBACK_RX_ROWS = [
   { number: '1', text: 'Lorem Ipsum is simply', m: 1, a: '', e: '', n: '' },
   { number: '2', text: 'Lorem Ipsum is simply', m: '', a: 1, e: '', n: '' },
   { number: '3', text: 'Lorem Ipsum is simply', m: '', a: '', e: 1, n: '' },
@@ -30,8 +30,66 @@ const DEFAULT_RX_ROWS = [
   { number: '6', text: 'Lorem Ipsum is simply', m: '', a: '', e: 1, n: '' },
 ]
 
-export default function Prescription() {
-  const [rxRows, setRxRows] = useState(DEFAULT_RX_ROWS)
+// pulls medicine-looking lines out of the AI diagnosis text
+function extractTabletsFromDiagnosis(diagnosisText) {
+  if (!diagnosisText) return []
+
+  const lines = diagnosisText.split(/\r?\n/)
+  const medKeywords = /mg|mcg|tablet|tab\.|capsule|cap\.|syrup|dose|drops|injection/i
+  const numbered = /^\s*[\-\•\*]?\s*\d*[\.\)]?\s*/
+
+  const matches = lines.filter((line) => medKeywords.test(line) && line.trim().length > 0)
+
+  return matches.map((line, i) => {
+    const clean = line.replace(numbered, '').trim()
+    const lower = clean.toLowerCase()
+
+    const hasMorning = /morning|before breakfast|after breakfast/.test(lower)
+    const hasAfternoon = /afternoon|noon|before lunch|after lunch/.test(lower)
+    const hasEvening = /evening|before dinner|after dinner/.test(lower)
+    const hasNight = /night|bedtime|before sleep/.test(lower)
+
+    const anyTimeSpecified = hasMorning || hasAfternoon || hasEvening || hasNight
+
+    return {
+      number: String(i + 1),
+      text: clean,
+      m: anyTimeSpecified ? (hasMorning ? 1 : '') : 1, // default to morning if nothing specified
+      a: hasAfternoon ? 1 : '',
+      e: hasEvening ? 1 : '',
+      n: hasNight ? 1 : '',
+    }
+  })
+}
+
+export default function Prescription({ patient }) {
+  const p = patient
+    ? {
+        name: patient.name || DEFAULT_PATIENT.name,
+        gender: patient.gender || DEFAULT_PATIENT.gender,
+        age: patient.age || DEFAULT_PATIENT.age,
+        patientId: patient.patientId || DEFAULT_PATIENT.patientId,
+        height: patient.height ? `${patient.height} cm` : DEFAULT_PATIENT.height,
+        weight: patient.weight ? `${patient.weight}kg` : DEFAULT_PATIENT.weight,
+        bmi: patient.bmi || DEFAULT_PATIENT.bmi,
+        bloodGroup: patient.bloodGroup || DEFAULT_PATIENT.bloodGroup,
+        allergies: patient.allergies || DEFAULT_PATIENT.allergies,
+        smoking: patient.smoking || DEFAULT_PATIENT.smoking,
+        avatar: patient.avatar || DEFAULT_PATIENT.avatar,
+      }
+    : DEFAULT_PATIENT
+
+  const initialRxRows = useMemo(() => {
+    const diagnosisText = patient?.aiResult?.diagnosis
+    const extracted = extractTabletsFromDiagnosis(diagnosisText)
+    return extracted.length > 0 ? extracted : FALLBACK_RX_ROWS
+  }, [patient])
+
+  const [rxRows, setRxRows] = useState(initialRxRows)
+
+  useEffect(() => {
+    setRxRows(initialRxRows)
+  }, [initialRxRows])
 
   const updateText = (index, value) => {
     setRxRows((rows) => rows.map((row, i) => (i === index ? { ...row, text: value } : row)))
@@ -50,25 +108,25 @@ export default function Prescription() {
           <h3 className="text-[15.5px] font-bold mb-4">Patient Summary</h3>
           <div className="flex gap-3.5 mb-4">
             <img
-              src={PATIENT.avatar}
-              alt={PATIENT.name}
+              src={p.avatar}
+              alt={p.name}
               className="w-16 h-16 rounded-xl object-cover shrink-0"
             />
             <div>
-              <div className="text-[15px] font-bold">{PATIENT.name}</div>
+              <div className="text-[15px] font-bold">{p.name}</div>
               <div className="text-[11.5px] text-faint my-0.5">
-                {PATIENT.gender} - {PATIENT.age} years
+                {p.gender} - {p.age} years
               </div>
-              <div className="text-[11px] text-faint">{PATIENT.patientId}</div>
+              <div className="text-[11px] text-faint">{p.patientId}</div>
             </div>
           </div>
           <div className="grid grid-cols-3 gap-3 border-t border-line pt-3.5">
-            <SummaryField label="Height" value={PATIENT.height} />
-            <SummaryField label="Weight" value={PATIENT.weight} />
-            <SummaryField label="BMI" value={PATIENT.bmi} />
-            <SummaryField label="Blood Group" value={PATIENT.bloodGroup} />
-            <SummaryField label="Allergies" value={PATIENT.allergies} />
-            <SummaryField label="Smoking" value={PATIENT.smoking} />
+            <SummaryField label="Height" value={p.height} />
+            <SummaryField label="Weight" value={p.weight} />
+            <SummaryField label="BMI" value={p.bmi} />
+            <SummaryField label="Blood Group" value={p.bloodGroup} />
+            <SummaryField label="Allergies" value={p.allergies} />
+            <SummaryField label="Smoking" value={p.smoking} />
           </div>
         </div>
 
@@ -116,14 +174,6 @@ export default function Prescription() {
             <span className="w-4 text-center">N</span>
           </div>
 
-          {/* vertical divider lines */}
-          {/* <div className="pointer-events-none absolute top-0 right-2 bottom-0 flex justify-end gap-10 pr-0">
-            <span className="w-px bg-line" />
-            <span className="w-px bg-line" />
-            <span className="w-px bg-line" />
-            <span className="w-px bg-line" />
-          </div> */}
-
           <div className="flex flex-col gap-8">
             {rxRows.map((row, i) => (
               <div key={i} className="flex justify-between items-center gap-4">
@@ -152,6 +202,12 @@ export default function Prescription() {
                 </div>
               </div>
             ))}
+
+            {rxRows.length === 0 && (
+              <p className="text-[13px] text-faint">
+                No medications detected in the diagnosis text.
+              </p>
+            )}
           </div>
         </div>
       </div>

@@ -4,6 +4,7 @@ import UploadCard from './UploadCard.jsx'
 import ScanImagesMenu from './ScanImagesMenu.jsx'
 import VitalCard from './VitalCard.jsx'
 import { vitalDefs } from '../data/vitals.js'
+import { createDiagnosis } from '../api/client'
 
 const DOC_TILES = [
   'Lab Reports',
@@ -30,6 +31,7 @@ export default function CreatePatient({ onSave }) {
 
   })
   const [avatar, setAvatar] = useState(null)
+  const [saving, setSaving] = useState(false)
 
   const bmi = useMemo(() => {
     const h = parseFloat(form.height)
@@ -48,8 +50,21 @@ export default function CreatePatient({ onSave }) {
     reader.readAsDataURL(file)
   }
 
-  const handleSave = () => {
-    onSave({ ...form, bmi, avatar })
+  const handleSave = async () => {
+    if (saving) return
+    setSaving(true)
+    try {
+      const aiResult = await createDiagnosis({
+        symptoms: form.symptoms,
+        medical_history: form.problem || 'None reported',
+        patient_name: form.name || 'Unknown',
+      })
+      onSave({ ...form, bmi, avatar, aiResult })
+    } catch (err) {
+      alert(err.message)
+    } finally {
+      setSaving(false)
+    }
   }
 
   return (
@@ -221,9 +236,10 @@ export default function CreatePatient({ onSave }) {
 
       <button
         onClick={handleSave}
-        className="w-full py-4 rounded-2xl bg-indigo-light text-white text-[15px] font-bold tracking-wide shadow-soft hover:bg-indigo transition-colors"
+        disabled={saving}
+        className="w-full py-4 rounded-2xl bg-indigo-light text-white text-[15px] font-bold tracking-wide shadow-soft hover:bg-indigo transition-colors disabled:opacity-60"
       >
-        Save
+        {saving ? 'Saving...' : 'Save'}
       </button>
     </div>
   )

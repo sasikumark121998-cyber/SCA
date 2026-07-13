@@ -43,7 +43,7 @@ def diagnosis(
 
     new_query = QueryLog(
         user_id=current_user.id,
-        patient_name=current_user.username,
+        patient_name=request.patient_name or current_user.username,
         symptoms=request.symptoms,
         medical_history=request.medical_history,
         diagnosis=diagnosis_result,

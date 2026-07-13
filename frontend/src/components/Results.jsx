@@ -41,6 +41,8 @@ export default function Results({ patient }) {
     avatar: 'https://i.pravatar.cc/100?img=32',
   }
 
+  const ai = p.aiResult
+
   const problemStatement = `"${p.name}" presents with: ${
     p.symptoms || 'reported symptoms'
   }. Reported allergies: ${
@@ -145,7 +147,7 @@ export default function Results({ patient }) {
             </button>
           </div>
           <div className="flex-1 bg-slate-50 rounded-xl p-4 text-[13px] text-faint overflow-y-auto thin-scroll">
-            AI clinical insights and recommendations will appear here once the query is submitted...
+            {ai ? ai.diagnosis : 'AI clinical insights and recommendations will appear here once the query is submitted...'}
           </div>
         </div>
 
