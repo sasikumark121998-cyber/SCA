@@ -1,18 +1,8 @@
 import { useState } from 'react'
 import { Send, Stethoscope, FileText, ScanLine, History, Scissors, ClipboardList, BookOpen } from 'lucide-react'
 import VitalCard from './VitalCard.jsx'
-import BodyDiagram from './BodyDiagram.jsx'
-import { vitalDefs, sampleResultVitals } from '../data/vitals.js'
+import { vitalDefs } from '../data/vitals.js'
 import bodyDiagram from "../assets/b.png";
-
-const RX_ROWS = [
-  { name: '1. Paracetamol 500mg', m: 1, a: '', e: 1, n: '' },
-  { name: '2. Azithromycin 250mg', m: 1, a: '', e: '', n: '' },
-  { name: '3. Cetirizine 10mg', m: '', a: '', e: '', n: 1 },
-  { name: '4. ORS Sachet', m: 1, a: 1, e: 1, n: '' },
-  { name: '5. Vitamin C 500mg', m: 1, a: '', e: '', n: '' },
-  { name: '6. Omeprazole 20mg', m: '', a: '', e: '', n: 1 },
-]
 
 const inputSummaryItems = (symptoms) => [
   { icon: Stethoscope, title: 'Symptoms', sub: symptoms || 'Fever, Headache, Fatigue, Dry cough' },
@@ -97,35 +87,6 @@ export default function Results({ patient }) {
               ))}
             </div>
           </div>
-
-          {/* <div className="bg-white rounded-xl2 shadow-soft p-5"> */}
-            {/* <div className="flex justify-between items-center mb-3.5">
-              <h3 className="text-[15.5px] font-bold">Prescription</h3>
-              <button className="text-xs font-bold text-indigo-light">View</button>
-            </div>
-            <table className="w-full border-collapse text-xs">
-              <thead>
-                <tr>
-                  <th className="text-left"></th>
-                  <th className="text-[11px] text-faint font-bold pb-2 w-8">M</th>
-                  <th className="text-[11px] text-faint font-bold pb-2 w-8">A</th>
-                  <th className="text-[11px] text-faint font-bold pb-2 w-8">E</th>
-                  <th className="text-[11px] text-faint font-bold pb-2 w-8">N</th>
-                </tr>
-              </thead>
-              <tbody>
-                {RX_ROWS.map((row) => (
-                  <tr key={row.name}>
-                    <td className="py-1.5 pr-1 text-muted truncate max-w-[170px]">{row.name}</td>
-                    <td className="text-center font-bold text-indigo-light">{row.m}</td>
-                    <td className="text-center font-bold text-indigo-light">{row.a}</td>
-                    <td className="text-center font-bold text-indigo-light">{row.e}</td>
-                    <td className="text-center font-bold text-indigo-light">{row.n}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div> */}
         </div>
 
         {/* CENTER COLUMN */}
@@ -146,7 +107,7 @@ export default function Results({ patient }) {
               <Send className="w-[15px] h-[15px] text-white" fill="white" />
             </button>
           </div>
-          <div className="flex-1 bg-slate-50 rounded-xl p-4 text-[13px] text-faint overflow-y-auto thin-scroll">
+          <div className="flex-1 bg-slate-50 rounded-xl p-4 text-[14.5px] font-normal leading-relaxed text-ink whitespace-pre-wrap overflow-y-auto thin-scroll">
             {ai ? ai.diagnosis : 'AI clinical insights and recommendations will appear here once the query is submitted...'}
           </div>
         </div>
@@ -182,8 +143,9 @@ export default function Results({ patient }) {
           <VitalCard
             key={def.key}
             def={def}
-            value={sampleResultVitals[def.key]}
-            num={sampleResultVitals[def.key + '_num']}
+            gender={p.gender}
+            value={p.vitals?.[def.key]}
+            num={p.vitals?.[`${def.key}_num`]}
           />
         ))}
       </div>

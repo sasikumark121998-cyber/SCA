@@ -1,12 +1,12 @@
-import { Stethoscope, LogOut } from 'lucide-react'
+import { Stethoscope, LogOut, UserPlus, FileBarChart2, ClipboardList, History as HistoryIcon, HelpCircle } from 'lucide-react'
 
 const NAV_ITEMS = [
-  { key: 'create', label: 'Create Patient' },
-  { key: 'results', label: 'Results' },
-  { key: 'prescription', label: 'Prescription' },
-  { key: 'history', label: 'History' },
+  { key: 'create', label: 'Create Patient', icon: UserPlus },
+  { key: 'results', label: 'Results', icon: FileBarChart2 },
+  { key: 'prescription', label: 'Prescription', icon: ClipboardList },
+  { key: 'history', label: 'History', icon: HistoryIcon },
   // { key: 'ai', label: 'AI Analysis' },
-  { key: 'help', label: 'Help' },
+  { key: 'help', label: 'Help', icon: HelpCircle },
 ]
 
 export default function Sidebar({ view, setView, onLogout }) {
@@ -28,12 +28,13 @@ export default function Sidebar({ view, setView, onLogout }) {
           <button
             key={item.key}
             onClick={() => setView(item.key)}
-            className={`text-left px-[18px] py-3 rounded-xl text-[14.5px] font-semibold tracking-wide transition-colors ${
+            className={`flex items-center gap-2.5 text-left px-[18px] py-3 rounded-xl text-[14.5px] font-semibold tracking-wide transition-colors ${
               view === item.key
                 ? 'bg-white text-navy-dark'
                 : 'text-indigo-100/80 text-slate-300 hover:bg-white/5 hover:text-white'
             }`}
           >
+            <item.icon className="w-[17px] h-[17px] shrink-0" />
             {item.label}
           </button>
         ))}

@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect } from 'react'
 import { Calendar } from 'lucide-react'
+import { getHistory } from '../api/client'
 
 const DEFAULT_PATIENT = {
   name: 'Hudson Dylan',
@@ -14,12 +15,6 @@ const DEFAULT_PATIENT = {
   smoking: 'No',
   avatar: 'https://i.pravatar.cc/100?img=32',
 }
-
-const HISTORY_ROWS = Array.from({ length: 13 }, (_, i) => ({
-  id: '#4355',
-  name: 'Michael A. Miner',
-  key: i,
-}))
 
 const FALLBACK_RX_ROWS = [
   { number: '1', text: 'Lorem Ipsum is simply', m: 1, a: '', e: '', n: '' },
@@ -54,7 +49,7 @@ function extractTabletsFromDiagnosis(diagnosisText) {
     return {
       number: String(i + 1),
       text: clean,
-      m: anyTimeSpecified ? (hasMorning ? 1 : '') : 1, // default to morning if nothing specified
+      m: anyTimeSpecified ? (hasMorning ? 1 : '') : 1,
       a: hasAfternoon ? 1 : '',
       e: hasEvening ? 1 : '',
       n: hasNight ? 1 : '',
@@ -86,10 +81,25 @@ export default function Prescription({ patient }) {
   }, [patient])
 
   const [rxRows, setRxRows] = useState(initialRxRows)
+  const [historyRows, setHistoryRows] = useState([])
 
   useEffect(() => {
     setRxRows(initialRxRows)
   }, [initialRxRows])
+
+  useEffect(() => {
+    getHistory()
+      .then((data) =>
+        setHistoryRows(
+          data.map((row) => ({
+            id: '#' + row.id,
+            name: row.patient_name || '--',
+            key: row.id,
+          }))
+        )
+      )
+      .catch((err) => console.error(err.message))
+  }, [])
 
   const updateText = (index, value) => {
     setRxRows((rows) => rows.map((row, i) => (i === index ? { ...row, text: value } : row)))
@@ -143,7 +153,7 @@ export default function Prescription({ patient }) {
             <div>Name</div>
           </div>
           <div className="flex flex-col gap-1 max-h-[380px] overflow-y-auto thin-scroll">
-            {HISTORY_ROWS.map((row, i) => (
+            {historyRows.map((row, i) => (
               <div
                 key={row.key}
                 className={`grid grid-cols-2 gap-2 px-2 py-2.5 rounded-lg text-[13px] text-ink ${
@@ -154,6 +164,10 @@ export default function Prescription({ patient }) {
                 <div>{row.name}</div>
               </div>
             ))}
+
+            {historyRows.length === 0 && (
+              <div className="text-[12px] text-faint px-2 py-3">No history yet.</div>
+            )}
           </div>
         </div>
       </div>
@@ -204,9 +218,7 @@ export default function Prescription({ patient }) {
             ))}
 
             {rxRows.length === 0 && (
-              <p className="text-[13px] text-faint">
-                No medications detected in the diagnosis text.
-              </p>
+              <p className="text-[13px] text-faint">No medications detected in the diagnosis text.</p>
             )}
           </div>
         </div>

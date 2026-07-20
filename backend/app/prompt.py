@@ -50,15 +50,22 @@ Generate the following, using these EXACT section headers:
 6. Medications
 7. Emergency Level
 
-For the "Medications" section, list each recommended tablet/medicine on its own line
-in this exact format:
-- <Medicine Name> <Dosage in mg/mcg> - <Tablet/Capsule/Syrup> - <Morning/Afternoon/Evening/Night>
+STRICT RULES FOR MEDICATIONS:
+- Only recommend medications that are clinically appropriate for the specific
+  disease/condition identified in "Possible Disease".
+- Do NOT include generic filler medications (like vitamins, ORS, multivitamins)
+  unless they are directly relevant to treating the identified condition.
+- Each medicine must directly address a symptom or the root cause of the
+  diagnosed condition — no unrelated or precautionary additions.
+- List each medicine on its own line in this exact format:
+  - <Medicine Name> <Dosage in mg/mcg> - <Tablet/Capsule/Syrup> - <Morning/Afternoon/Evening/Night>
+- Only specify a timing (Morning/Afternoon/Evening/Night) if it is clinically
+  meaningful for that medicine. If timing does not matter, omit it.
 
 Example:
-- Paracetamol 500mg - Tablet - Morning, Evening
+- Paracetamol 500mg - Tablet - Morning, Night
 - Amoxicillin 250mg - Capsule - Morning, Night
-- Cetirizine 10mg - Tablet - Night
 
-Always specify at least one timing (Morning/Afternoon/Evening/Night) for every medication.
-If no medication is appropriate, write "No medication recommended" under Medications.
+If no medication is appropriate for the identified condition, write
+"No medication recommended" under Medications.
 """

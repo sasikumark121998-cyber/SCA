@@ -32,6 +32,7 @@ export default function CreatePatient({ onSave }) {
   })
   const [avatar, setAvatar] = useState(null)
   const [saving, setSaving] = useState(false)
+  const [vitals, setVitals] = useState({})
 
   const bmi = useMemo(() => {
     const h = parseFloat(form.height)
@@ -50,6 +51,10 @@ export default function CreatePatient({ onSave }) {
     reader.readAsDataURL(file)
   }
 
+  const handleVitalChange = (key, value, num) => {
+    setVitals((v) => ({ ...v, [key]: value, [`${key}_num`]: num }))
+  }
+
   const handleSave = async () => {
     if (saving) return
     setSaving(true)
@@ -59,7 +64,7 @@ export default function CreatePatient({ onSave }) {
         medical_history: form.problem || 'None reported',
         patient_name: form.name || 'Unknown',
       })
-      onSave({ ...form, bmi, avatar, aiResult })
+      onSave({ ...form, bmi, avatar, aiResult, vitals })
     } catch (err) {
       alert(err.message)
     } finally {
@@ -230,7 +235,14 @@ export default function CreatePatient({ onSave }) {
       {/* Vitals */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-[18px] mb-6">
         {vitalDefs.map((def) => (
-          <VitalCard key={def.key} def={def} />
+          <VitalCard
+            key={def.key}
+            def={def}
+            gender={form.gender}
+            value={vitals[def.key]}
+            num={vitals[`${def.key}_num`]}
+            onChange={handleVitalChange}
+          />
         ))}
       </div>
 

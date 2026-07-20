@@ -15,24 +15,15 @@ export default function Topbar({ title }) {
       </div>
 
       <div className="flex items-center gap-3.5 ml-auto">
-        <button className="relative w-11 h-11 rounded-full bg-white shadow-soft flex items-center justify-center">
-          <Bell className="w-[19px] h-[19px] text-indigo" />
-          <span className="absolute -top-1 -right-1 bg-bad text-white text-[10px] font-bold w-[17px] h-[17px] rounded-full flex items-center justify-center">
-            2
-          </span>
-        </button>
-        <button className="w-11 h-11 rounded-full bg-white shadow-soft flex items-center justify-center">
-          <Settings className="w-[19px] h-[19px] text-indigo" />
-        </button>
         <div className="flex items-center gap-2.5">
           <img
             src="https://i.pravatar.cc/100?img=47"
-            alt="Dr Sharaa"
+            alt="AI Diagnostic Assistant"
             className="w-[46px] h-[46px] rounded-full object-cover shadow-soft"
           />
           <div>
-            <div className="text-sm font-bold text-ink">Dr.Sharaa</div>
-            <div className="text-[11.5px] text-faint">Physician</div>
+            <div className="text-sm font-bold text-ink">Smart Clinical Advisor</div>
+            <div className="text-[11.5px] text-faint">AI Diagnostic Assistant</div>
           </div>
         </div>
       </div>
